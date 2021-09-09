@@ -74,184 +74,36 @@ Graph* leitura(ifstream& input_file, int directed, int weightedEdge, int weighte
     return graph;
 }
 
-Graph* leituraInstancia(ifstream& input_file, int directed, int weightedEdge, int weightedNode){
+Graph* leituraInstancia(ifstream& input_file){
 
     //Variáveis para auxiliar na criação dos nós no Grafo
-    int idNodeSource;
-    int idNodeTarget;
     int order;
-    int numEdges;
+    int number_labels;
 
     //Pegando a ordem do grafo
-    input_file >> order >> numEdges;
+    input_file >> order >> number_labels;
 
     //Criando objeto grafo
-    Graph* graph = new Graph(order, directed, weightedEdge, weightedNode);
+    Graph* graph = new Graph(order, number_labels);
 
     //Leitura de arquivo
-    while(input_file >> idNodeSource >> idNodeTarget) {
-
-        graph->insertEdge(idNodeSource, idNodeTarget, 0);
-
-    }
-
-    return graph;
-}
-
-int menu(){
-
-    int selecao;
-
-    cout << "------------------------------------------------------" << endl;
-    cout << "-------------------------MENU-------------------------" << endl;
-    cout << "------------------------------------------------------" << endl;
-    cout << "[1] Fecho Transitivo Direto" << endl;
-    cout << "[2] Fecho Transitivo Indireto" << endl;
-    cout << "[3] Caminho Mínimo entre dois vértices - Djkstra" << endl;
-    cout << "[4] Caminho Mínimo entre dois vértices - Floyd" << endl;
-    cout << "[5] Árvore Geradora Mínima de Prim" << endl;
-    cout << "[6] Árvore Geradora Mínima de Kruskal" << endl;
-    cout << "[7] Imprimir caminhamento em Profundidade" << endl;
-    cout << "[8] Imprimir Ordenacao Topológica" << endl;
-    cout << "[0] Sair" << endl;
-    cout << "------------------------------------------------------" << endl;
-
-    cout << "\nDigite a Opcao Desejada: ";
-    cin >> selecao;
-
-    return selecao;
-
-}
-
-void selecionar(int selecao, Graph* graph, ofstream& output_file){
-
-    switch (selecao) {
-
-        //Fecho Transitivo Direto
-        case 1:{
-            int id;
-            cout << "Digite o ID do vertice: ";
-            cin >> id;
-            graph->directedTransitiveClosure(output_file, id);
-            break;
-        }
-            //Fecho Transitivo Indireto
-        case 2:{
-            int id;
-            cout << "Digite o ID do vertice: ";
-            cin >> id;
-            graph->indirectedTransitiveClosure(output_file, id);
-            break;
-        }
-
-            //Caminho Mínimo entre dois vértices - Djkstra;
-        case 3:
-        {
-            int idOrig, idDest;
-            cout << "Digite o id do no inicial: ";
-            cin >> idOrig;
-            cout << "Digite o id do no de destino: ";
-            cin >> idDest;
-
-                if (!(idOrig < 0 || idOrig >= graph->getOrder()) || !(idDest < 0 || idDest >= graph->getOrder()))
-                {
-                    graph->dijkstra(idOrig, idDest, output_file);
-                }
-                else
-                {
-                    cout << endl
-                        << "Id inexistente!" << endl;
-                }
-            break;
-        }
-            //Caminho Mínimo entre dois vértices - Floyd;
-        case 4:{
-            int idOrig, idDest;
-            cout << "Digite o id do no inicial: ";
-            cin >> idOrig;
-            cout << "Digite o id do no de destino: ";
-            cin >> idDest;
-
-            if (!(idOrig < 0 || idOrig >= graph->getOrder()) || !(idDest < 0 || idDest >= graph->getOrder()))
-            {
-                graph->floyd(idOrig, idDest, output_file);
+    for(int i = 0; i < order; i++){
+        for(int j = i + 1; j < order; j++){
+            int label;
+            input_file >> label;
+            //cout << i << " i " << j << " j " << label << endl;
+            if(label != number_labels){
+                graph->insertEdgeLabel(i, j , label);
             }
-            else
-                cout << endl
-                     << "Id inexistente!" << endl;
-            break;
         }
-
-            //Árvore Geradora Mínima de Prim;
-        case 5:{
-
-            graph->AGMPrim(graph->getVertInduz(),output_file);
-            break;
-        }
-
-
-        case 6:{
-
-            graph->AGMKruskal(graph->getVertInduz(), output_file);
-            break;
-        }
-            //Imprimir caminhamento em Profundidade;
-        case 7:{
-            int id;
-            cout << "Digite o ID do vertice: ";
-            cin >> id;
-            graph->depth(output_file, id);
-            break;
-        }
-
-        //Imprimir Ordenacao Topológica;
-        case 8:{
-            graph->topologicalSorting(output_file);
-            getchar();
-            getchar();
-
-            break;
-        }
-
-        default:
-        {
-            cout << "Erro!!!Opcao Invalida!!!" << endl;
-            getchar();
-            getchar();
-        }
-
     }
-}
-
-int mainMenu(ofstream& output_file, Graph* graph){
-
-    int selecao = menu();
-
-    while(selecao != 0){
-
-        if(output_file.is_open())
-            selecionar(selecao, graph, output_file);
-
-        else
-            cout << "Unable to open the output_file" << endl;
-
-        output_file << endl;
-
-        system("clear");
-        selecao = menu();
-    }
-
-    if(output_file.is_open()){
-        output_file.close();
-    }
-
-    return 0;
+    return graph;
 }
 
 int main(int argc, char const *argv[]) {
 
     //Verificação se todos os parâmetros do programa foram entrados
-    if (argc != 6) {
+    if (argc < 2) {
 
         cout << "ERROR: Expecting: ./<program_name> <input_file> <output_file> <directed> <weighted_edge> <weighted_node> " << endl;
         return 1;
@@ -261,10 +113,14 @@ int main(int argc, char const *argv[]) {
     string program_name(argv[0]);
     string input_file_name(argv[1]);
 
+    int method;
+
+    float alpha;
+
     string instance;
-    if(input_file_name.find("v") <= input_file_name.size()){
-        string instance = input_file_name.substr(input_file_name.find("v"));
-        cout << "Running " << program_name << " with instance " << instance << " ... " << endl;
+    if(input_file_name.find(".") <= input_file_name.size()){
+        string instance = input_file_name.substr(input_file_name.find("."));
+        cout << "Rodando " << program_name << "com a instancia " << instance << " ... " << endl;
     }
 
     //Abrindo arquivo de entrada
@@ -277,12 +133,40 @@ int main(int argc, char const *argv[]) {
 
     if(input_file.is_open()){
 
-        graph = leitura(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
+        graph = leituraInstancia(input_file);
 
-    }else
-        cout << "Unable to open " << argv[1];
+    }else{
+        cout << "Nao foi possivel abrir o arquivo " << argv[1];
+        return 1;
+    }
 
-    mainMenu(output_file, graph);
+    cout << "Escolha um dos Algoritmos abaixo:" << endl <<
+                "1 - Algoritmo Guloso" << endl <<
+                "2 - Algoritmo Guloso Randomizado" << endl <<
+                "3 - Algoritmo Guloso Randomizado Reativo" << endl <<
+                "4 - Sair" << endl;
+    cin >> method;
+
+    while(method != 4){
+
+        switch (method){
+            case 1:  graph->GreedyAlgorithm();
+            break;
+
+
+        getchar();
+        getchar();
+        system("clear");
+
+        cout << "Escolha um dos Algoritmos abaixo:" << endl <<
+                "1 - Algoritmo Guloso" << endl <<
+                "2 - Algoritmo Guloso Randomizado" << endl <<
+                "3 - Algoritmo Guloso Randomizado Reativo" << endl <<
+                "4 - Sair" << endl;
+
+        cin >> method;
+    }
+
 
     //Fechando arquivo de entrada
     input_file.close();
@@ -291,5 +175,5 @@ int main(int argc, char const *argv[]) {
     output_file.close();
 
     return 0;
+    }
 }
-

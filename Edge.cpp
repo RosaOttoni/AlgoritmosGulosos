@@ -10,7 +10,7 @@ using namespace std;
 // Constructor
 Edge::Edge()
 {
-    
+
 }
 
 Edge::Edge(int target_id){
@@ -20,7 +20,6 @@ Edge::Edge(int target_id){
     this->weight = 0;
 
 }
-
 
 
 // Destructor
@@ -52,6 +51,11 @@ float Edge::getWeight(){
 
 }
 
+int Edge::getLabel(){
+
+    return this->label;
+}
+
 // Setters
 void Edge::setNextEdge(Edge* edge){
 
@@ -64,3 +68,10 @@ void Edge::setWeight(float weight){
     this->weight = weight;
 
 }
+
+void Edge::setLabel(int label){
+
+    this->label = label;
+
+}
+

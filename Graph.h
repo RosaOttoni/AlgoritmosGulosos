@@ -8,6 +8,7 @@
 #include <fstream>
 #include <stack>
 #include <list>
+#include <vector>
 
 using namespace std;
 
@@ -22,6 +23,18 @@ typedef struct
     int weight;
 } myEdge;
 
+typedef struct
+{
+    int label;
+    int frequency;
+} myLabel;
+
+typedef struct
+{
+    int quantity;
+    float average;
+}myAverage;
+
 class Graph{
 
     //Atributes
@@ -30,6 +43,8 @@ class Graph{
         int order;
 
         int number_edges;
+
+        int number_labels;
 
         bool directed;
 
@@ -67,11 +82,20 @@ class Graph{
 
         void printDijkstra(int *map, int *noAnterior, float *dist, int idOrig, int idDest, int directed, ofstream &output_file);
 
+        void FrequencyLabels(vector<myLabel> &labels);
+
+        void AddEdgesLabel(Graph *graph, int label);
+
+        bool IsComplete(Graph *solution);
+
+        void AuxComponent(Graph *solution, int component[], int vertex, int id);
 
     public:
 
         //Constructor
         Graph(int order, bool directed, bool weighted_edge, bool weighted_node);
+
+        Graph(int order, int number_labels);
 
         //Destructor
         ~Graph();
@@ -90,6 +114,10 @@ class Graph{
         Node* getFirstNode();
 
         Node* getLastNode();
+
+        int getNumberLabels();
+
+        void Heuristic();
 
         // Setters
         void setFirstNode(Node* node);
@@ -110,6 +138,8 @@ class Graph{
         void cleanVisited();
 
         void printGraph();
+
+        void insertEdgeLabel(int id, int target_id, int label);
 
         //methods phase1
         void directedTransitiveClosure(ofstream &output_file, int id);
@@ -145,6 +175,8 @@ class Graph{
         void dijkstra(int idOrig, int idDest, ofstream &output_file);
 
         void depth(ofstream &output_file, int id);
+
+        void GreedyAlgorithm ();
 };
 
 #endif // GRAPH_H_INCLUDED

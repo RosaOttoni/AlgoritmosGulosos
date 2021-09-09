@@ -15,6 +15,7 @@ class Edge{
         int target_id;
         Edge* next_edge;
         float weight;
+        int label;
 
     public:
         // Constructor
@@ -26,10 +27,12 @@ class Edge{
         int getTargetId();
         Edge* getNextEdge();
         float getWeight();
+        int getLabel();
         // Setters
         void setNextEdge(Edge* edge);
-        void setWeight(float weight); 
+        void setWeight(float weight);
+        void setLabel(int label);
 
-}; 
+};
 
 #endif // EDGE_H_INCLUDED

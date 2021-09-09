@@ -259,3 +259,24 @@ Edge* Node::hasEdgeBetween(int target_id)
     }
     return nullptr;
 }
+
+// Função para inserir uma aresta com rótulo
+void Node::insertEdgeLabel(int target_id, int label){
+    // Verifies whether there are at least one edge in the node
+    if(this->first_edge != nullptr){
+        // Allocating the new edge and keeping the integrity of the edge list
+        Edge* edge = new Edge(target_id);
+        edge->setLabel(label);
+        this->last_edge->setNextEdge(edge);
+        this->last_edge = edge;
+
+    }
+    else{
+         // Allocating the new edge and keeping the integrity of the edge list
+        this->first_edge = new Edge(target_id);
+        this->first_edge->setLabel(label);
+        this->last_edge = this->first_edge;
+
+    }
+
+}

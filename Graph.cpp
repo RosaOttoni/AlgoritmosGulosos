@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <limits>
+#include <chrono>
 
 #define INFINITO std::numeric_limits<int>::max()
 
@@ -32,6 +33,17 @@ Graph::Graph(int order, bool directed, bool weighted_edge, bool weighted_node)
     this->weighted_node = weighted_node;
     this->first_node = this->last_node = nullptr;
     this->number_edges = 0;
+}
+
+Graph::Graph (int order, int number_labels){
+
+    this->order = order;
+    this->directed = false;
+    this->weighted_edge = false;
+    this->weighted_node = false;
+    this->first_node = this->last_node = nullptr;
+    this->number_edges = 0;
+    this->number_labels = number_labels;
 }
 
 // Destructor
@@ -61,6 +73,10 @@ int Graph::getNumberEdges()
 
     return this->number_edges;
 }
+
+int Graph::getNumberLabels(){
+    return this->number_labels;
+ }
 //Function that verifies if the graph is directed
 bool Graph::getDirected()
 {
@@ -162,10 +178,6 @@ void Graph::insertEdge(int id, int target_id, float weight)
             target_node->insertEdge(id, weight);
         }
     }
-    else
-    {
-        //cerr << "Error: Edge (" << id << "," << target_id << ") already exists" << endl;
-    }
 }
 
 void Graph::removeNode(int id)
@@ -241,9 +253,42 @@ void Graph::printGraph()
         cout << aux->getId();
         for (Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge())
         {
-            cout << " -  " << adj->getTargetId() << " (" << adj->getWeight() << ")";
+            cout << " -  " << adj->getTargetId() << " (" << adj->getLabel() << ")";
         }
         cout << endl;
+    }
+}
+
+void Graph::insertEdgeLabel(int id, int target_id, int label)
+{
+    Node *node = this->getNode(id);
+    Node *target_node = this->getNode(target_id);
+
+    if (node == nullptr)
+    {
+        this->insertNode(id);
+        node = this->getNode(id);
+    }
+    if (target_node == nullptr)
+    {
+        this->insertNode(target_id);
+        target_node = this->getNode(target_id);
+    }
+    if (!node->searchEdge(target_id))
+    {
+        this->number_edges++;
+
+        if (this->getDirected())
+        {
+            node->insertEdgeLabel(target_id, label);
+            node->incrementOutDegree();
+            target_node->incrementInDegree();
+        }
+        else
+        {
+            node->insertEdgeLabel(target_id, label);
+            target_node->insertEdgeLabel(id, label);
+        }
     }
 }
 
@@ -1442,3 +1487,227 @@ void Graph::printDijkstra(int *map, int *noAnterior, float *dist, int idOrig, in
     cout << "--------------------------------------------------------------------" << endl;
 }
 
+void swapLabel(myLabel *a, myLabel *b)
+{
+    myLabel t = *a;
+    *a = *b;
+    *b = t;
+}
+
+/* Esta funcao pega o ultimo elemento como pivo, coloca o elemento pivo em sua posicao correta
+*  na matriz classificada e coloca todos os elementos menores (menores do que o pivo) a esquerda
+*  do pivo e todos os elementos maiores à direita do pivo
+*/
+int partitionLabel(vector <myLabel> &arr, int low, int high)
+{
+    //pivo
+    int pivot = arr[high].frequency;
+
+    //indice do elemento menor
+    int i = (low - 1);
+
+    for (int j = low; j <= high - 1; j++)
+    {
+        //Se o elemento current for maior que ou
+        //igual ao pivo
+        if (arr[j].frequency >= pivot)
+        {
+            //incrementa o indice do elemento menor
+            i++;
+            //e troca o indice menor i com o current j
+            swapLabel(&arr[i], &arr[j]);
+        }
+    }
+    swapLabel(&arr[i + 1], &arr[high]);
+    return (i + 1);
+}
+
+void quickSortLabel(vector <myLabel> &arr, int low, int high)
+{
+    if (low < high)
+    {
+        //pi eh o indice de particionamento
+        int pi = partitionLabel(arr, low, high);
+
+        //Classificamos os elementos separadamente antes
+        //particao e depois da particao
+        quickSortLabel(arr, low, pi - 1);
+        quickSortLabel(arr, pi + 1, high);
+    }
+}
+
+//Função que conta a frequência de rótulos
+void Graph::FrequencyLabels(vector<myLabel> &labels){
+    //Inicializa a frequência com 0
+    for(int i = 0; i < this->getNumberLabels(); i++){
+        myLabel label;
+        label.label = i;
+        label.frequency = 0;
+        labels.push_back(label);
+    }
+    //Os dois for percorre para preencher a frequência dos rótulos
+    for (Node *aux = this->getFirstNode(); aux != nullptr; aux = aux->getNextNode())
+    {
+        for (Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge())
+        {
+            labels[adj->getLabel()].frequency++;
+        }
+    }
+    //Dividimos por dois, pois o grafo conta cada aresta duas vezes
+    for(int i = 0; i < this->getNumberLabels(); i++){
+        labels[i].frequency /= 2;
+    }
+}
+
+//Função que adiciona as arestas de um rótulo a solução
+void Graph::AddEdgesLabel(Graph *graph, int label){
+
+    for (Node *aux = this->getFirstNode(); aux != nullptr; aux = aux->getNextNode()){
+
+        for (Edge *adj = aux->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
+
+            if(adj->getLabel() == label){
+
+                graph->insertEdgeLabel(aux->getId(), adj->getTargetId(), label);
+            }
+        }
+    }
+}
+
+//Função que testa a solução está completa através do número de componentes conexas
+bool Graph::IsComplete(Graph *solution){
+
+    int id = 0;
+    int number_vertex = solution->getOrder();
+    int *component = new int [number_vertex];
+
+    //Inicializa a componente de cada vértice com -1
+    for(int i = 0; i < number_vertex; i++){
+        component[i] = -1;
+    }
+    for(int i = 0; i < number_vertex; i++){
+        if(component[i] == -1){
+            AuxComponent(solution, component, i, id++);
+        }
+    }
+
+    //Se o grafo tiver mais de uma componente conexa ele não é conexo
+    for(int i = 0; i < number_vertex; i++){
+        if(component[i] != 0){
+            return false;
+        }
+    }
+
+    return true;
+}
+
+//Busca em profundidade para encontrar as componentes conexas
+void Graph::AuxComponent(Graph *solution, int component[], int vertex, int id){
+    component[vertex] = id;
+     Node *node = solution->getNode(vertex);
+
+    //Percorre a lista de adjacente do vertice, caso ele tenha vertices adjacentes
+    if(node != nullptr){
+
+        for(Edge *adj = node->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
+            //Verifica de se o id já foi visitado
+            if(component[adj->getTargetId()] == -1){
+                AuxComponent(solution, component, adj->getTargetId(), id);
+            }
+        }
+    }
+}
+
+//Busca em profundidade para gerar a árvore a partir das arestas dos rótulos escolhidos
+void treeSolutionRec(Graph *solution, list<myEdge> &treeSolution, bool visited[], int id){
+    visited[id] = true;
+    Node *node = solution->getNode(id);
+
+    //Percorre a lista de adjacência do nó
+    for(Edge *adj = node->getFirstEdge(); adj != nullptr; adj = adj->getNextEdge()){
+        if(!visited[adj->getTargetId()]){
+            myEdge edge;
+            edge.origin = id;
+            edge.destiny = adj->getTargetId();
+            treeSolution.push_back(edge);
+            treeSolutionRec(solution, treeSolution, visited, adj->getTargetId());
+        }
+    }
+}
+
+//Gera a árvore a partir do grafo formado pelas arestas dos rótulos escolhidos
+list<myEdge> getTreeSolution(Graph *solution){
+    bool *visited = new bool[solution->getOrder()];
+    list<myEdge> treeSolution;
+
+    //Inicializa o vetor de visitados
+    for(int i = 0; i < solution->getOrder(); i++){
+        visited[i] = false;
+    }
+
+    treeSolutionRec(solution, treeSolution, visited, 0);
+
+    return treeSolution;
+}
+
+// Algoritmo Guloso
+void Graph::GreedyAlgorithm (){
+    //Início da contagem de tempo da execução do algoritmo
+    auto timeStart = std::chrono::high_resolution_clock::now();
+
+    //Número de rótulos da solução
+    int solutionSize = 0;
+
+    //Inicializa a solução somente com os vértices de G
+    Graph *solution = new Graph(this->getOrder(), false, false, false);
+
+    //Cria o vetor de labels
+    vector<myLabel> labels;
+    //myLabel *labels = new myLabel[this->getNumberLabels()];
+
+    FrequencyLabels(labels);
+
+   /* for(int i = 0; i < this->getNumberLabels(); i++){
+        cout << labels[i].frequency << endl;
+    }*/
+
+    quickSortLabel(labels, 0, this->getNumberLabels() - 1);
+
+    /*for(int i = 0; i < this->getNumberLabels(); i++){
+        cout << labels[i].label << " " << labels[i].frequency << endl;
+    }*/
+
+    //Percorre a lista de rótulos ordenados de acordo com a heurística
+    for(int i = 0; i < this->getNumberLabels(); i++){
+        //incrementa o tamanho da solução
+        solutionSize++;
+        AddEdgesLabel(solution, labels[i].label);
+
+        //solution->printGraph();
+
+        //Testa se a solução parcial é um grafo conexo
+        if(IsComplete(solution)){
+            break;
+        }
+    }
+
+    list<myEdge> treeSolution = getTreeSolution(solution);
+
+    //Diferença de tempo
+    auto diff = std::chrono::high_resolution_clock::now() - timeStart;
+
+    //Conversão para microsegundos
+    auto time = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+
+    cout << "Solucao Guloso = " << solutionSize << " rotulos"<< endl;
+
+    cout << "Tempo de execucao = " << time.count() << " milissegundos"<< endl;
+
+    list<myEdge>::iterator it;
+
+    //Imprime a árvore geradora de rótulação minima
+    /*for(it = treeSolution.begin(); it != treeSolution.end(); it++){
+        cout << (*it).origin << " " << (*it).destiny << endl;
+    }*/
+
+}

@@ -87,6 +87,8 @@ class Node{
 
         Edge* hasEdgeBetween(int target_id);
 
+        void insertEdgeLabel(int target_id, int label);
+
 };
 
 #endif // NODE_H_INCLUDED
