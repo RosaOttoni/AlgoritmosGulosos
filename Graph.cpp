@@ -1711,3 +1711,71 @@ void Graph::GreedyAlgorithm (){
     }*/
 
 }
+
+//Algoritmo Guloso Randomizado
+void Graph::GreedyAlgorithmRandomized(float alpha, int iterations){
+    //Início da contagem de tempo da execução do algoritmo
+    auto timeStart = std::chrono::high_resolution_clock::now();
+
+    //Custo da melhor solução e custo da solução atual
+    int bestCost = this->getNumberLabels(), costSolution;
+
+    vector <myLabel> labels, auxLabels;
+
+    list<myEdge> treeSolution;
+
+    //Inicializa a semente do random
+    srand(time(NULL));
+
+    //Lendo as frequencias de cada rótulo do grafo
+    FrequencyLabels(labels);
+
+    quickSortLabel(labels, 0, this->getNumberLabels() - 1);
+
+    for(int i = 0; i < iterations; i++){
+        //Inicializa a solução somente com os vértices de G
+        Graph *solution = new Graph(this->getOrder(), false, false, false);
+
+        costSolution = 0;
+
+        auxLabels = labels;
+
+        //Encontra uma solução
+        do{
+            //seleciona randomicamente um rótulo de acordo com o alpha
+            int random = rand() % ((int)(alpha * (auxLabels.size() - 1)));
+            //incrementa o tamanho da solução
+            costSolution++;
+
+            //adiciona as arestas do rótulo selecionado
+            AddEdgesLabel(solution, auxLabels[random].label);
+            //remove a aresta do vetor
+            auxLabels.erase(auxLabels.begin() + random);
+
+        }while(!IsComplete(solution));
+
+        if (costSolution < bestCost){
+
+            bestCost = costSolution;
+
+            treeSolution = getTreeSolution(solution);
+        }
+        //delete solution;
+    }
+
+    //Diferença de tempo
+    auto diff = std::chrono::high_resolution_clock::now() - timeStart;
+
+    //Conversão para microsegundos
+    auto time = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+
+    cout << "Solucao Guloso Randomizado = " << bestCost << " rotulos"<< endl;
+
+    cout << "Tempo de execucao = " << time.count() << " milissegundos"<< endl;
+
+    //Imprime a árvore geradora de rótulação minima
+    /*for(it = treeSolution.begin(); it != treeSolution.end(); it++){
+        cout << (*it).origin << " " << (*it).destiny << endl;
+    }*/
+}
+

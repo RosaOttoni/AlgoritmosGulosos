@@ -153,6 +153,13 @@ int main(int argc, char const *argv[]) {
             case 1:  graph->GreedyAlgorithm();
             break;
 
+            case 2: cout << "Digite o valor de alpha: " ;
+                    cin >> alpha;
+
+                    graph->GreedyAlgorithmRandomized(alpha, 500);
+
+            break;
+
 
         getchar();
         getchar();

@@ -177,6 +177,8 @@ class Graph{
         void depth(ofstream &output_file, int id);
 
         void GreedyAlgorithm ();
+
+        void GreedyAlgorithmRandomized(float alpha, int iterations);
 };
 
 #endif // GRAPH_H_INCLUDED
