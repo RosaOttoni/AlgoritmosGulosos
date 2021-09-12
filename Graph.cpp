@@ -1629,6 +1629,7 @@ void treeSolutionRec(Graph *solution, list<myEdge> &treeSolution, bool visited[]
             myEdge edge;
             edge.origin = id;
             edge.destiny = adj->getTargetId();
+            edge.label = adj->getLabel();
             treeSolution.push_back(edge);
             treeSolutionRec(solution, treeSolution, visited, adj->getTargetId());
         }
@@ -1703,20 +1704,18 @@ void Graph::GreedyAlgorithm (string output_file){
 
     cout << "Tempo de execucao = " << time.count() << " milissegundos"<< endl;
 
-    list<myEdge>::iterator it;
+    //Imprime saída no arquivo .dot
+    cout << "Saida impressa no arquivo " << output_file << endl;
 
-    FILE* file = fopen(output_file.c_str(), "a+");
+    outputTree(treeSolution, output_file);
+
+    //Utilizado para gerar os resultados do relatório
+    /*FILE* file = fopen(output_file.c_str(), "a+");
     stringstream ss;
     ss << solutionSize << ";" << time.count()<<"\n";
     fputs(ss.str().c_str(), file);
-    
-    fclose(file);
 
-    //Imprime a árvore geradora de rótulação minima
-    /*for(it = treeSolution.begin(); it != treeSolution.end(); it++){
-        cout << (*it).origin << " " << (*it).destiny << endl;
-    }*/
-
+    fclose(file);*/
 }
 
 //Algoritmo Guloso Randomizado
@@ -1780,17 +1779,18 @@ void Graph::GreedyAlgorithmRandomized(float alpha, int iterations, string output
 
     cout << "Tempo de execucao = " << time.count() << " milissegundos"<< endl;
 
-    //Imprime a árvore geradora de rótulação minima
-    /*for(it = treeSolution.begin(); it != treeSolution.end(); it++){
-        cout << (*it).origin << " " << (*it).destiny << endl;
-    }*/
-   
-    FILE* file = fopen(output_file.c_str(), "a+");
+    //Imprime saída no arquivo .dot
+    cout << "Saida impressa no arquivo " << output_file << endl;
+
+    outputTree(treeSolution, output_file);
+
+    //Utilizado para gerar os resultados do relatório
+    /*FILE* file = fopen(output_file.c_str(), "a+");
     stringstream ss;
     ss << bestCost << ";" << time.count()<<"\n";
     fputs(ss.str().c_str(), file);
-    
-    fclose(file);
+
+    fclose(file);*/
 
 }
 
@@ -1838,6 +1838,7 @@ int chooseAlpha (vector <float> probabilities){
     vector <float> accumulatedProbabilities;
     //acumulador para preencher o vetor
     float accumulator = 0, random;
+    int indexAlpha;
 
     for(int i = 0;  i < probabilities.size(); i++){
         accumulator += probabilities[i];
@@ -1848,9 +1849,12 @@ int chooseAlpha (vector <float> probabilities){
 
     for(int i = 0; i < accumulatedProbabilities.size(); i++){
         if(random < accumulatedProbabilities[i]){
-            return i;
+             indexAlpha = i;
+             break;
         }
     }
+
+    return indexAlpha;
 }
 
 void uptadeAverages (vector <myAverage> &averages, int costSolution, int indexAlpha){
@@ -1945,15 +1949,35 @@ void Graph::GreedyAlgorithmRandomizedReactive(vector <float> alphas, int block, 
 
     cout << "Tempo de execucao = " << time.count() << " milissegundos"<< endl;
 
-    FILE* file = fopen(output_file.c_str(), "a+");
+    //Imprime saída no arquivo .dot
+    cout << "Saida impressa no arquivo " << output_file << endl;
+
+    outputTree(treeSolution, output_file);
+
+    //Utilizado para gerar os resultados do relatório
+    /*FILE* file = fopen(output_file.c_str(), "a+");
     stringstream ss;
     ss << bestCost << ";" << time.count()<<"\n";
     fputs(ss.str().c_str(), file);
-    
-    fclose(file);
 
-    //Imprime a árvore geradora de rótulação minima
-    /*for(it = treeSolution.begin(); it != treeSolution.end(); it++){
-        cout << (*it).origin << " " << (*it).destiny << endl;
-    }*/
+    fclose(file);*/
+}
+
+void Graph::outputTree(list<myEdge> treeSolution, string outputFileName){
+
+    ofstream output_file;
+
+    output_file.open(outputFileName.c_str(), ios::out | ios::trunc);
+
+    output_file << "graph {" << endl;
+
+    list<myEdge>::iterator it;
+
+    for(it = treeSolution.begin(); it != treeSolution.end(); it++){
+        // A aresta de retorno tem o estilo pontilhado
+        output_file << (*it).origin << "--"<< (*it).destiny <<  "[label="<< (*it).label << "]" << endl;
+    }
+    output_file << "}"<< endl;
+
+    output_file.close();
 }

@@ -21,6 +21,7 @@ typedef struct
     int origin;
     int destiny;
     int weight;
+    int label;
 } myEdge;
 
 typedef struct
@@ -89,6 +90,8 @@ class Graph{
         bool IsComplete(Graph *solution);
 
         void AuxComponent(Graph *solution, int component[], int vertex, int id);
+
+        void outputTree(list<myEdge> treeSolution, string outputFileName);
 
     public:
 

@@ -1,0 +1,15 @@
+Para compilar, utilize o comando:
+g++ *.c* -o exec
+
+Para executar, utilize o comando:
+./exec <arquivo_entrada> <arquivo_saida> <metodo> <iteracoes> <alpha>
+
+Sendo método definido como:
+1 - Guloso
+2 - Guloso Randomizado
+3 - Guloso Randomizado Reativo
+
+Os parâmetros <iteracoes> e <alpha> não é necessário para o método Guloso.
+O parâmetro <alpha> não é necessário para o método Guloso Randomizado Reativo.
+
+O programa mostrará na tela o custo da solução e o tempo de execução. O arquivo de saída será gerado no formato .dot.

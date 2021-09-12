@@ -103,31 +103,23 @@ Graph* leituraInstancia(ifstream& input_file){
 int main(int argc, char const *argv[]) {
 
     //Verificação se todos os parâmetros do programa foram entrados
-    if (argc < 2) {
+    if (argc < 4) {
 
-        cout << "ERROR: Expecting: ./<program_name> <input_file> <output_file> <directed> <weighted_edge> <weighted_node> " << endl;
+        cout << "ERRO: Esperado: ./nome_programa <arquivo_entrada> <arquivo_saida> <metodo> <iteracoes> <alpha>" << endl;
         return 1;
 
     }
 
-    string program_name(argv[0]);
-    string input_file_name(argv[1]);
+    int method = atoi(argv[3]);
 
-    int method;
+    int iterations;
 
     float alpha;
-
-    string instance;
-    if(input_file_name.find(".") <= input_file_name.size()){
-        string instance = input_file_name.substr(input_file_name.find("."));
-        cout << "Rodando " << program_name << "com a instancia " << instance << " ... " << endl;
-    }
 
     //Abrindo arquivo de entrada
     ifstream input_file;
     ofstream output_file;
     input_file.open(argv[1], ios::in);
-    //output_file.open(argv[2], ios::out | ios::trunc);
 
     Graph* graph;
 
@@ -140,50 +132,45 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
-    /*cout << "Escolha um dos Algoritmos abaixo:" << endl <<
-                "1 - Algoritmo Guloso" << endl <<
-                "2 - Algoritmo Guloso Randomizado" << endl <<
-                "3 - Algoritmo Guloso Randomizado Reativo" << endl <<
-                "4 - Sair" << endl;*/
-     method = atoi (argv[4]);
+    cout << "Rodando com a instancia " << argv[1] << " ... " << endl << endl;
 
-   // while(method != 4){
+    switch (method){
+        case 1:  graph->GreedyAlgorithm(argv[2]);
+        break;
 
-        switch (method){
-            case 1:  graph->GreedyAlgorithm(argv[2]);
-            break;
+        case 2:
 
-            case 2: //cout << "Digite o valor de alpha: " ;
-                    alpha = atof (argv[3]);
+            if(argc < 6){
+                cout << "ERRO: Esperado: ./nome_programa <arquivo_entrada> <arquivo_saida> <metodo> <iteracoes> <alpha>" << endl;
+                return 1;
+            }
+            else{
+                iterations = atoi(argv[4]);
+                alpha = atof(argv[5]);
+                graph->GreedyAlgorithmRandomized(alpha, iterations, argv[2]);
+            }
 
-                    graph->GreedyAlgorithmRandomized(alpha, 500, argv[2]);
+        break;
 
-            break;
+        case 3:
 
-            case 3:
-                    vector <float> alphas;
-                    alphas.push_back(0.05);
-                    alphas.push_back(0.10);
-                    alphas.push_back(0.15);
-                    alphas.push_back(0.30);
-                    alphas.push_back(0.50);
+            if(argc < 5){
+                cout << "ERRO: Esperado: ./nome_programa <arquivo_entrada> <arquivo_saida> <metodo> <iteracoes>" << endl;
+                return 1;
+            }
+            else{
+                iterations = atoi(argv[4]);
+                vector <float> alphas;
+                alphas.push_back(0.05);
+                alphas.push_back(0.10);
+                alphas.push_back(0.15);
+                alphas.push_back(0.30);
+                alphas.push_back(0.50);
 
-                    graph->GreedyAlgorithmRandomizedReactive(alphas, 100, 2500, argv[2]);
-            break;
-        }
-
-        /*getchar();
-        getchar();
-        system("clear");
-
-        cout << "Escolha um dos Algoritmos abaixo:" << endl <<
-                "1 - Algoritmo Guloso" << endl <<
-                "2 - Algoritmo Guloso Randomizado" << endl <<
-                "3 - Algoritmo Guloso Randomizado Reativo" << endl <<
-                "4 - Sair" << endl;
-
-        cin >> method;*/
-   // }
+                graph->GreedyAlgorithmRandomizedReactive(alphas, 100, iterations, argv[2]);
+            }
+        break;
+    }
 
 
     //Fechando arquivo de entrada
