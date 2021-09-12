@@ -179,6 +179,8 @@ class Graph{
         void GreedyAlgorithm ();
 
         void GreedyAlgorithmRandomized(float alpha, int iterations);
+
+        void GreedyAlgorithmRandomizedReactive(vector <float> alphas, int block, int iterations);
 };
 
 #endif // GRAPH_H_INCLUDED

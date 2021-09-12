@@ -1779,3 +1779,159 @@ void Graph::GreedyAlgorithmRandomized(float alpha, int iterations){
     }*/
 }
 
+//Inicializa os vetores de probabilidades e médias
+void initializeVectors(vector <float> &probabilities, vector <myAverage> &averages, int tam){
+    for(int i = 0; i < tam; i++){
+        myAverage aux;
+
+        aux.quantity = 0;
+
+        aux.average = INFINITO;
+
+        probabilities.push_back(1.0/tam);
+
+        averages.push_back(aux);
+    }
+}
+
+void updateProbabilities(vector <float> &probabilities, vector <myAverage> averages, int solBest){
+    int sigma = 10;
+
+    vector <float> q;
+
+    float sum = 0;
+    //Inicializa o vetor q e o somatório de qi
+    for(int i = 0; i < probabilities.size(); i++){
+
+        float qi = pow((solBest / averages[i].average), sigma);
+
+        sum += qi;
+
+        q.push_back(qi);
+    }
+    //Inicializa as probabilidades
+    for(int i = 0; i < probabilities.size(); i++){
+
+        probabilities[i] = q[i] / sum;
+    }
+}
+
+// Escolhe o Alpha
+int chooseAlpha (vector <float> probabilities){
+
+    //vetor que acumula as probabilidades
+    vector <float> accumulatedProbabilities;
+    //acumulador para preencher o vetor
+    float accumulator = 0, random;
+
+    for(int i = 0;  i < probabilities.size(); i++){
+        accumulator += probabilities[i];
+        accumulatedProbabilities.push_back(accumulator);
+    }
+    //gera um número aleatório entre 0 e 1
+    random = ((float)rand()) / RAND_MAX;
+
+    for(int i = 0; i < accumulatedProbabilities.size(); i++){
+        if(random < accumulatedProbabilities[i]){
+            return i;
+        }
+    }
+}
+
+void uptadeAverages (vector <myAverage> &averages, int costSolution, int indexAlpha){
+    //Testa se é a primeira solução com esse alpha
+    if(averages[indexAlpha].quantity == 0){
+
+        averages[indexAlpha].quantity = 1;
+
+        averages[indexAlpha].average = costSolution;
+    }
+    else{
+        //calcula a nova média
+        averages[indexAlpha].average = (averages[indexAlpha].average * averages[indexAlpha].quantity + costSolution) / (averages[indexAlpha].quantity + 1);
+        //incrementa a quantidade
+        averages[indexAlpha].quantity++;
+    }
+}
+
+// Algoritmo Guloso Randomizado Reativo
+void Graph::GreedyAlgorithmRandomizedReactive(vector <float> alphas, int block, int iterations){
+    //Início da contagem de tempo da execução do algoritmo
+    auto timeStart = std::chrono::high_resolution_clock::now();
+
+    //Custo da melhor solução, custo da solução atual e o index do alpha
+    int bestCost = INFINITO, costSolution, indexAlpha;
+
+    vector <float> probabilities;
+
+    vector <myLabel> labels, auxLabels;
+
+    vector <myAverage> averages;
+
+    list <myEdge> treeSolution;
+
+    //Inicializa a semente do random
+    srand(time(NULL));
+
+    //Lendo as frequencias de cada rótulo do grafo
+    FrequencyLabels(labels);
+
+    quickSortLabel(labels, 0, this->getNumberLabels() - 1);
+
+    initializeVectors(probabilities, averages, alphas.size());
+
+    for(int i = 0; i < iterations; i++){
+        if(i % block == 0){
+            updateProbabilities(probabilities, averages, bestCost);
+        }
+
+        indexAlpha = chooseAlpha(probabilities);
+        //Inicializa a solução somente com os vértices de G
+        Graph *solution = new Graph(this->getOrder(), false, false, false);
+
+        costSolution = 0;
+
+        auxLabels = labels;
+
+        //Encontra uma solução
+        do{
+            //seleciona randomicamente um rótulo de acordo com o alpha
+            int random = rand() % ((int)(alphas[indexAlpha] * (auxLabels.size() - 1)));
+
+            //incrementa o tamanho da solução
+            costSolution++;
+
+            //adiciona as arestas do rótulo selecionado
+            AddEdgesLabel(solution, auxLabels[random].label);
+
+            //remove a aresta do vetor
+            auxLabels.erase(auxLabels.begin() + random);
+
+        }while(!IsComplete(solution));
+
+        uptadeAverages(averages, costSolution, indexAlpha);
+
+        if (costSolution < bestCost){
+
+            bestCost = costSolution;
+
+            treeSolution = getTreeSolution(solution);
+        }
+        //delete solution;
+    }
+
+       //Diferença de tempo
+    auto diff = std::chrono::high_resolution_clock::now() - timeStart;
+
+    //Conversão para microsegundos
+    auto time = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+
+    cout << "Solucao Guloso Randomizado Reativo = " << bestCost << " rotulos"<< endl;
+
+    cout << "Tempo de execucao = " << time.count() << " milissegundos"<< endl;
+
+    //Imprime a árvore geradora de rótulação minima
+    /*for(it = treeSolution.begin(); it != treeSolution.end(); it++){
+        cout << (*it).origin << " " << (*it).destiny << endl;
+    }*/
+}

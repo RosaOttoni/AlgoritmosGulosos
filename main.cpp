@@ -160,6 +160,17 @@ int main(int argc, char const *argv[]) {
 
             break;
 
+            case 3:
+                    vector <float> alphas;
+                    alphas.push_back(0.05);
+                    alphas.push_back(0.10);
+                    alphas.push_back(0.15);
+                    alphas.push_back(0.30);
+                    alphas.push_back(0.50);
+
+                    graph->GreedyAlgorithmRandomizedReactive(alphas, 100, 2500);
+            break;
+        }
 
         getchar();
         getchar();
@@ -182,5 +193,4 @@ int main(int argc, char const *argv[]) {
     output_file.close();
 
     return 0;
-    }
 }
