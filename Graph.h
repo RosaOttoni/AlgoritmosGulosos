@@ -176,11 +176,11 @@ class Graph{
 
         void depth(ofstream &output_file, int id);
 
-        void GreedyAlgorithm ();
+        void GreedyAlgorithm (string output_file);
 
-        void GreedyAlgorithmRandomized(float alpha, int iterations);
+        void GreedyAlgorithmRandomized(float alpha, int iterations, string output_file);
 
-        void GreedyAlgorithmRandomizedReactive(vector <float> alphas, int block, int iterations);
+        void GreedyAlgorithmRandomizedReactive(vector <float> alphas, int block, int iterations, string output_file );
 };
 
 #endif // GRAPH_H_INCLUDED

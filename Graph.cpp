@@ -1651,7 +1651,7 @@ list<myEdge> getTreeSolution(Graph *solution){
 }
 
 // Algoritmo Guloso
-void Graph::GreedyAlgorithm (){
+void Graph::GreedyAlgorithm (string output_file){
     //Início da contagem de tempo da execução do algoritmo
     auto timeStart = std::chrono::high_resolution_clock::now();
 
@@ -1705,6 +1705,13 @@ void Graph::GreedyAlgorithm (){
 
     list<myEdge>::iterator it;
 
+    FILE* file = fopen(output_file.c_str(), "a+");
+    stringstream ss;
+    ss << solutionSize << ";" << time.count()<<"\n";
+    fputs(ss.str().c_str(), file);
+    
+    fclose(file);
+
     //Imprime a árvore geradora de rótulação minima
     /*for(it = treeSolution.begin(); it != treeSolution.end(); it++){
         cout << (*it).origin << " " << (*it).destiny << endl;
@@ -1713,7 +1720,7 @@ void Graph::GreedyAlgorithm (){
 }
 
 //Algoritmo Guloso Randomizado
-void Graph::GreedyAlgorithmRandomized(float alpha, int iterations){
+void Graph::GreedyAlgorithmRandomized(float alpha, int iterations, string output_file){
     //Início da contagem de tempo da execução do algoritmo
     auto timeStart = std::chrono::high_resolution_clock::now();
 
@@ -1777,6 +1784,14 @@ void Graph::GreedyAlgorithmRandomized(float alpha, int iterations){
     /*for(it = treeSolution.begin(); it != treeSolution.end(); it++){
         cout << (*it).origin << " " << (*it).destiny << endl;
     }*/
+   
+    FILE* file = fopen(output_file.c_str(), "a+");
+    stringstream ss;
+    ss << bestCost << ";" << time.count()<<"\n";
+    fputs(ss.str().c_str(), file);
+    
+    fclose(file);
+
 }
 
 //Inicializa os vetores de probabilidades e médias
@@ -1855,7 +1870,7 @@ void uptadeAverages (vector <myAverage> &averages, int costSolution, int indexAl
 }
 
 // Algoritmo Guloso Randomizado Reativo
-void Graph::GreedyAlgorithmRandomizedReactive(vector <float> alphas, int block, int iterations){
+void Graph::GreedyAlgorithmRandomizedReactive(vector <float> alphas, int block, int iterations, string output_file){
     //Início da contagem de tempo da execução do algoritmo
     auto timeStart = std::chrono::high_resolution_clock::now();
 
@@ -1929,6 +1944,13 @@ void Graph::GreedyAlgorithmRandomizedReactive(vector <float> alphas, int block, 
     cout << "Solucao Guloso Randomizado Reativo = " << bestCost << " rotulos"<< endl;
 
     cout << "Tempo de execucao = " << time.count() << " milissegundos"<< endl;
+
+    FILE* file = fopen(output_file.c_str(), "a+");
+    stringstream ss;
+    ss << bestCost << ";" << time.count()<<"\n";
+    fputs(ss.str().c_str(), file);
+    
+    fclose(file);
 
     //Imprime a árvore geradora de rótulação minima
     /*for(it = treeSolution.begin(); it != treeSolution.end(); it++){

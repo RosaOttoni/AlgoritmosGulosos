@@ -127,7 +127,7 @@ int main(int argc, char const *argv[]) {
     ifstream input_file;
     ofstream output_file;
     input_file.open(argv[1], ios::in);
-    output_file.open(argv[2], ios::out | ios::trunc);
+    //output_file.open(argv[2], ios::out | ios::trunc);
 
     Graph* graph;
 
@@ -140,23 +140,23 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
-    cout << "Escolha um dos Algoritmos abaixo:" << endl <<
+    /*cout << "Escolha um dos Algoritmos abaixo:" << endl <<
                 "1 - Algoritmo Guloso" << endl <<
                 "2 - Algoritmo Guloso Randomizado" << endl <<
                 "3 - Algoritmo Guloso Randomizado Reativo" << endl <<
-                "4 - Sair" << endl;
-    cin >> method;
+                "4 - Sair" << endl;*/
+     method = atoi (argv[4]);
 
-    while(method != 4){
+   // while(method != 4){
 
         switch (method){
-            case 1:  graph->GreedyAlgorithm();
+            case 1:  graph->GreedyAlgorithm(argv[2]);
             break;
 
-            case 2: cout << "Digite o valor de alpha: " ;
-                    cin >> alpha;
+            case 2: //cout << "Digite o valor de alpha: " ;
+                    alpha = atof (argv[3]);
 
-                    graph->GreedyAlgorithmRandomized(alpha, 500);
+                    graph->GreedyAlgorithmRandomized(alpha, 500, argv[2]);
 
             break;
 
@@ -168,11 +168,11 @@ int main(int argc, char const *argv[]) {
                     alphas.push_back(0.30);
                     alphas.push_back(0.50);
 
-                    graph->GreedyAlgorithmRandomizedReactive(alphas, 100, 2500);
+                    graph->GreedyAlgorithmRandomizedReactive(alphas, 100, 2500, argv[2]);
             break;
         }
 
-        getchar();
+        /*getchar();
         getchar();
         system("clear");
 
@@ -182,8 +182,8 @@ int main(int argc, char const *argv[]) {
                 "3 - Algoritmo Guloso Randomizado Reativo" << endl <<
                 "4 - Sair" << endl;
 
-        cin >> method;
-    }
+        cin >> method;*/
+   // }
 
 
     //Fechando arquivo de entrada
